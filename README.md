@@ -3,7 +3,7 @@
 
 :heavy_dollar_sign: Linux_USER_creation: 
 
-  ● The goal of this exercise is to create a shell script that adds users to the same Linux system as the script is executed on.
+  ● The goal of this exercise is to create a shell script that adds users to the same Linux system .
  1) Enforces that it be executed with superuser (root) privileges.
  2) Uses the first argument provided on the command line as the username for the account.
  3) Automatically generates a password for the new account .
