@@ -9,3 +9,6 @@
  3) Automatically generate a password for the new account .
  4) Inform the user if the account was not able to be created for some reason.
  5) Display the username, password, and host where the account was created.
+ 
+ ![sc1](https://user-images.githubusercontent.com/102508387/216790190-c866a7ed-b49e-4d72-ab2a-02d5877d562a.png)
+
