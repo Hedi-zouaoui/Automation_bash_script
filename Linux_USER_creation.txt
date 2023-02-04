@@ -1,0 +1,84 @@
+#!/bin/bash
+# this script will creates a new user on the local system with suppling a user name as an argument to the script and a comment for the account ( optionally ) , a powerful password will be automatically generated for the account , and finally the username , password , the host for the account will be displayed .#
+# chmod +x [script_name] (OR) chmod 755 [script_name] 
+#
+#	PS : make sure the script is being executed with superuser privileges " SUDO " OR ROOT user 
+
+
+###########
+
+if [[ "${UID}" -ne 0 ]] 
+#root have always UID=0 
+#-ne : not equal 
+#verif if the script is being runned with superuser priviliges or not  
+then 
+  echo 'RUN WITH SUDO OR AS ROOT -- (sudo + [SCRIPT_NAME] )  '
+  exit 1 #defin exit 1 ; failure 
+fi 
+
+if [[ "${#}" -lt 1 ]]
+#verif if the user passed at least on argument  
+then 
+  echo "USAGE : ${0} USER_NAME [COMMENT].. " 
+  echo "Create an account on the local system with the name [USER_NAME] and a comments (the real name of the user/app )  [COMMENT]" 
+  exit 1 
+fi 
+
+USER_NAME="${1}"
+#$1 : first argu 
+ 
+#the rest of argus 
+shift 
+#shift everyting down  as we already userd the first argu 
+COMMENT="${@}"  
+#argu left 
+
+#generate a password
+PASSWORD=$(date +%s%N | sha256sum | head -c48)  
+#-s : seconds since the Epoch ( 1970 -01 -01 : 00:00 ) 
+#-n : nanoseconds 
+#sha256sum : encypted message 
+#-c : 48 carcters password  
+
+#create the USER
+useradd -c "${COMMENT}" -m ${USER_NAME}
+#-m : for the home dir creation 
+
+if [[ "${?}" -ne 0 ]] 
+#check to see if the use is added or not 
+then 
+ echo 'the account could not be created ' 
+ exit 1 
+fi 
+
+#Set the password 
+echo ${PASSWORD} | passwd --stdin ${USER_NAME} 
+#pip the input with "|" as the input of passwd 
+
+if [[ "${?}" -ne 0 ]] 
+#check the last command 
+then 
+ echo "the password could not be set" 
+ exit 1 
+fi 
+
+#force password change from the uder in the first login 
+passwd -e ${USER_NAME}  
+#-e : --expire this in effect can force a user to change their password at the next login 
+
+#display the info of the user creation 
+echo 
+#blank line 
+echo 'username:' 
+echo "${USER_NAME}" 
+echo 
+echo 'password:' 
+echo "${PASSWORD}" 
+echo 
+echo 'host : ' 
+echo "${HOSTNAME}" 
+echo 
+exit 0  # defin exit 0 SUCCESS
+
+#to switch to the new user tap : -su [USERNAME] 
+#exit to leave 
