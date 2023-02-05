@@ -1,0 +1,114 @@
+#!/bin/bash
+
+
+#this script disable , deletes , archie , one or multiple users 
+
+readonly ARCHIVE_DIR='/archive' #golable var
+
+usage() {
+  echo "usage: ${0} [-dra] USER [USERN] .. " 
+  echo 'Disable a local linux account : ' 
+  echo ' -d Deletes accountes instead of disabling them ' 
+  echo ' -r Removes the home directory associated with the accounte(s)'
+  echo ' -a Creates an archive of the home directory associated with the accounte(s)' 
+  exit 1 
+} 
+
+
+if [[ "${UID}" -ne 0 ]] #verify the script being runned as root or with sudo 
+then 
+ echo 'run with sudo or as root'
+ exit 1 
+fi 
+
+
+
+
+while getopts dra OPTION  #while loop ; d : delete , r: remove , a : archive 
+do
+ case ${OPTION} in  #switch 
+   d) DELETE_USER='true' ;; 
+   r) REMOVE_OPTION='-r' ;; 
+   a) ARCHIVE='true' ;; 
+   ?) usage ;; #else 
+ esac 
+done 
+
+
+shift "$(( OPTIND - 1 ))" #shifting 1st argu 
+# OPTIND : the index of the next element to be processed in arg
+
+if [[ "${#}" -lt 1 ]] #number of arg less than 1 
+then 
+ usage #usage function
+fi 
+
+
+for USERNAME in "${@}" #for USERNAME in REST OF ARG 
+do 
+ echo "Processing user : ${USERNAME}"  
+
+ USERID=$(id -u ${USERNAME})  #getting the user id 
+ if [[ "${USERID}" -lt 1000 ]] #verif it s not a system user 
+  then 
+   echo "Refusing to remove the ${USERNAME} account with UID ${USERID}." 
+   exit 1 
+  fi
+
+ if [[ "${ARCHIVE}" = 'true' ]] 
+ then 
+  if [[ ! -d  "${ARCHIVE_DIR}" ]] #verif if archive director exist 
+   then  
+    echo "Creating ${ARCHIVE_DIR} directory " 
+    mkdir -p ${ARCHIVE_DIR} 
+    if [[ "${?}" -ne 0 ]] 
+    then  
+      echo "The archieve dir ${ARCHIVE_DIR} could not be created " 
+      exit 1 
+    fi 
+  fi
+
+     HOME_DIR="/home/${USERNAME}" 
+     ARCHIVE_FILE="${ARCHIVE_DIR}/${USERNAME}.tgz" 
+
+  if [[ -d "${HOME_DIR}" ]] 
+  then
+   echo "Archiving ${HOME_DIR} to ${ARCHIVE_FILE} " 
+   tar -zcf ${ARCHIVE_FILE} ${HOME_DIR} 
+#z: zip 
+#c: creates archive 
+#f: creates archive with given filename
+   if [[ "${?}" -ne 0 ]] 
+   then 
+    echo "could not create ${ARCHIVE_FILE} " 
+    exit 1 
+   fi 
+  else 
+     echo "${HOME_DIR} does not exist or is not a directory . " 
+     exit 1 
+  fi 
+ fi 
+ if [[ "${DELETE_USER}" = 'true' ]] #delete the user 
+ then 
+     userdel ${REMOVE_OPTION} ${USERNAME} #delete the user with remove option
+     if [[ "${?}" -ne 0 ]] 
+     then 
+      echo "the account ${USERNAME} was NOt deleted " 
+      exit 1 
+     fi
+     echo "The account ${USERNAME} was deleted " 
+ else 
+      chage -E 0 ${USERNAME} #Expire the user account 
+      if [[ "${?}" -ne 0 ]]
+      then 
+        echo "The account ${USERNAME} was NOT disabled" 
+        exit 1 
+      fi  
+      echo " the account ${USERNAME} was disabled " 
+ fi 
+done 
+exit 0
+#tar -ztvf /archive/{USERNAME} 
+#t: list the contant
+#v: verbose 
+#f: specify the file    
