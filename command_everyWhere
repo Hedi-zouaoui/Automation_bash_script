@@ -29,10 +29,10 @@ do
    esac 
 done 
 
-shift "$(( OPTIND - 1 ))" 
+shift "$(( OPTIND - 1 ))"  #keep the rest of argu 
 
 
-if [[ "${#}" -lt 1 ]] 
+if [[ "${#}" -lt 1 ]] # after the shift 
 then 
    usage 
 fi 
@@ -44,9 +44,9 @@ then
   exit 1 
 fi 
 EXIT_STATUS='0'
-for SERVER in $(cat ${SERVER_LIST}) 
+for SERVER in $(cat ${SERVER_LIST}) # loop into the file 
 do 
-  if [[ $"{VERBOSE}" = 'true' ]]
+  if [[ $"{VERBOSE}" = 'true' ]] #print the server executed
   then 
     echo "${SERVER}" 
   fi 
