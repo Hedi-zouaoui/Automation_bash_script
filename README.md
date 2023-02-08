@@ -27,7 +27,8 @@ reason.
 
 ![dis3](https://user-images.githubusercontent.com/102508387/217295497-74cac291-74d1-4709-b176-3de91eb4e0ae.png)
 
-:heavy_dollar_sign: command_everyWhere;
+:heavy_dollar_sign: command_everyWhere : 
+
   ● The goal of this script is to create a shell script that executes a given command on multiple servers.
   1) Execute all arguments as a single command on every server listed in the /vagrant/servers file by default.
 2) Execute the provided command as the user executing the script.
